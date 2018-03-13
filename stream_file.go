@@ -19,7 +19,7 @@ type StreamFile struct {
 }
 
 type StyleFmtId struct {
-	StyleId int
+	StyleId  int
 	CellType CellType
 }
 
@@ -109,20 +109,25 @@ func (sf *StreamFile) write(cells []string, styleFmtIds *[]StyleFmtId) error {
 		if styleFmtIds != nil && len(*styleFmtIds) > colIndex {
 			styleFmtId := (*styleFmtIds)[colIndex]
 			styleId = styleFmtId.StyleId
-			if styleFmtId.CellType == CellTypeNumeric {
+			switch styleFmtId.CellType {
+			case CellTypeNumeric:
 				cellType = "n"
 				valueOpen = "<v>"
 				valueClose = "</v>"
+			case CellTypeStringFormula:
+				cellType = "str"
+				valueOpen = "<f>"
+				valueClose = "</f>"
 			}
 		} else if colIndex < len(sf.currentSheet.styleIds) && sf.currentSheet.styleIds[colIndex] != 0 {
 			styleId = sf.currentSheet.styleIds[colIndex]
 		}
-		
+
 		cellCoordinate := GetCellIDStringFromCoords(colIndex, sf.currentSheet.rowCount-1)
 		cellOpen := `<c r="` + cellCoordinate + `" t="` + cellType + `"`
- 		if styleId > 0 {
+		if styleId > 0 {
 			cellOpen += ` s="` + strconv.Itoa(styleId) + `"`
- 		}
+		}
 		cellOpen += ">" + valueOpen
 		cellClose := valueClose + "</c>"
 
